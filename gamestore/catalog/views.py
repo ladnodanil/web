@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from catalog.models import Game
+from catalog.models import Category, Game, TagGame
 # Create your views here.
 menu = [
     {'title': "Каталог игр", 'url_name': 'catalog'},
@@ -16,11 +16,7 @@ data = {
     'menu': menu,
     'catalog': Game.stock.all()
 }
-cats_dv = [
-    {'id': 1, 'name': 'Открытый мир'},
-    {'id': 2, 'name': 'Ролевая игра в жанре «экшн»'},
-    {'id': 3, 'name': 'Вестерн'},
-]
+
 
 
 def index(request):
@@ -33,14 +29,16 @@ def index(request):
     return render(request, 'gamestore/index.html', context=data)
 
 
-def show_category(request, cat_id):
+def show_category(request, category_slug):
+    category = get_object_or_404(Category, slug=category_slug)
+    game = Game.stock.filter(category_id=category.pk)
     data = {
-        'title': 'Отображение по рубрикам',
+        'title': f'Игры из категории: {category.name}',
         'menu': menu,
-        'catalog': Game.stock.all(),
-        'cat_selected': cat_id,
+        'catalog': game,
+        'cat_selected': category.pk,
     }
-    return render(request, 'gamestore/index.html', context=data)
+    return render(request, 'gamestore/catalog.html', context=data)
 
 
 def catalog(request):
@@ -76,3 +74,16 @@ def game_detail(request, game_slug):
 
 def page_not_found(request, exception):
     return HttpResponseNotFound('<h1>Страница не найдена 404</h1>')
+
+
+def show_tag_gamelist(request, tag_slug):
+    tag = get_object_or_404(TagGame, slug=tag_slug)
+    games = tag.tags.filter(in_stock=Game.Status.IN_STOCK)
+    data = {
+        'title': f'Тег: {tag.name}',
+        'menu': menu,
+        'catalog': games,
+        'cat_selected': None,
+
+    }
+    return render(request, 'gamestore/catalog.html', context=data)

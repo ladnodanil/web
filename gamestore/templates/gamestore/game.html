@@ -1,10 +1,31 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<h1>{{game.title}}</h1>
-{% if game.image %}
-<p ><img class="img-article-left"
-src="{{game.image.url}}"></p>
-{% endif %}
-
-{{game.description|linebreaks}}
+<div class="game-detail">
+    <h1 class="game-title">{{ game.title }}</h1>
+    <div class="game-info">
+        {% if game.image %}
+        <div class="game-image">
+            <img class="img-article-left" src="{% static 'catalog/images/' %}{{ game.image }}" alt="{{ game.title }}">
+        </div>
+        {% endif %}
+        <div class="game-description">
+            <p>{{ game.description|linebreaks }}</p>
+        </div>
+        <div class="game-details">
+            <h2>Детали игры</h2>
+            <p><strong>Цена:</strong> {{ game.price }} руб.</p>
+            <p><strong>Категория:</strong> <a href="{{ game.category.get_absolute_url }}">{{ game.category.name }}</a></p>
+            <p><strong>Теги:</strong>
+                {% for tag in game.tags.all %}
+                <a href="{{ tag.get_absolute_url }}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            {% if game.details %}
+            <p><strong>Дата выпуска:</strong> {{ game.details.release_date }}</p>
+            <p><strong>Разработчик:</strong> {{ game.details.developer }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

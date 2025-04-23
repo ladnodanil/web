@@ -1,29 +1,29 @@
-
 {% extends 'base.html' %}
 {% load catalog_tags %}
 {% block content %}
 <h1>{{title}}</h1>
 <ul>
-    {% for p in catalog %}
-    <li>
-        <h2>{{p.title}}</h2>
-        <p >{{p.description}}</p>
-        <p ><a href="{{p.get_absolute_url}}">Подробно</a></p>
-        {% if not forloop.last %}
-        <hr>
-        {% endif %}
-    </li>
-    {% endfor %}
+  {% for p in catalog %}
+  <li>
+    <h2>{{p.title}}</h2>
+    <p>{{p.description}}</p>
+    <p><a href="{{p.get_absolute_url}}">Подробно</a></p>
+    {% if not forloop.last %}
+    <hr />
+    {% endif %}
+  </li>
+  {% endfor %}
 </ul>
-{% endblock %}
-{% block category %}
+{% endblock %} 
+{% block category %} 
 {% get_categories as categories %}
 <ul id="leftchapters">
-    {% if cat_selected == 0 or cat_selected is None %}
-    <li class="selected">Все категории</li>
-    {% else %}
-    <li><a href="{% url 'catalog' %}">Все категории</a></li>
-    {% endif %} 
-    {% show_categories cat_selected %}
+  {% if cat_selected == 0 or cat_selected is None %}
+  <li class="selected">Все категории</li>
+  {% else %}
+  <li><a href="{% url 'catalog' %}">Все категории</a></li>
+  {% endif %} 
+  {% show_categories cat_selected %}
+  <li>{% show_all_tags %}</li>
 </ul>
 {% endblock %}
