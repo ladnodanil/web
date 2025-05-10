@@ -1,0 +1,93 @@
+#branding h1, #branding h1 a {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+}
+#branding h1 a:hover {
+    text-decoration: underline;
+}
+#header {
+    background-color: #2ecc71;
+    border-bottom: 2px solid #27ae60;
+}
+
+#header a, #header a:visited, 
+#user-tools, 
+#user-tools a {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#user-tools a:hover {
+    text-decoration: underline;
+}
+
+#nav-sidebar {
+    background-color: #e8f8f5;
+}
+
+#nav-sidebar a {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+input[type="submit"].default, .submit-row input.default {
+    background-color: #2ecc71;
+    border-color: #27ae60;
+    color: white;
+    font-weight: bold;
+}
+
+input[type="submit"].default:hover, .submit-row input.default:hover {
+    background-color: #27ae60;
+}
+
+body {
+    background-color: #f9f9f9;
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.module caption {
+    background-color: #2ecc71;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    font-size: 18px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.module table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.module table th, 
+.module table td {
+    padding: 10px;
+}
+
+table a {
+    color: #27ae60;
+    text-decoration: none;
+}
+
+table a:hover {
+    text-decoration: underline;
+}
+
+.login #header {
+    background: #2ecc71;
+}
+div.breadcrumbs {
+    background: none;
+    background-color: transparent;
+    border-bottom: none;
+    color: #27ae60;
+}
+div.breadcrumbs a {
+    color: #27ae60;
+}
