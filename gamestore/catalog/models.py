@@ -56,7 +56,7 @@ class Game(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название')
     description = models.TextField(blank=True, verbose_name='Описание')
     price = models.IntegerField(verbose_name='Цена')
-    image = models.ImageField(blank=True, null=True, verbose_name='Изображение')
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/', blank=True, null=True, verbose_name='Изображение')
     slug = models.SlugField(max_length=255, db_index=True, unique=True, verbose_name='Слаг')
     in_stock = models.BooleanField(choices=tuple(map(lambda x: (bool(x[0]), x[1]), Status.choices)), default=Status.IN_STOCK, verbose_name='Статус')
     category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name='Категория')
@@ -69,3 +69,6 @@ class Game(models.Model):
 
     def get_absolute_url(self):
         return reverse('game_detail', kwargs={'game_slug': self.slug})
+
+class UploadFiles(models.Model):
+    file = models.FileField(upload_to='uploads_model')

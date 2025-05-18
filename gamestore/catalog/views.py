@@ -1,11 +1,14 @@
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from catalog.models import Category, Game, TagGame
+from catalog.models import Category, Game, TagGame, UploadFiles
+from catalog.form import AddGameForm, UploadFileForm
+import uuid
 # Create your views here.
 menu = [
     {'title': "Каталог игр", 'url_name': 'catalog'},
-    {'title': "Лидеры продаж", 'url_name': 'top_sellers'},
-    {'title': "Скидки", 'url_name': 'discounts'},
+    {'title': 'Добавить игру', 'url_name': 'add_game'},
+    # {'title': "Лидеры продаж", 'url_name': 'top_sellers'},
+    # {'title': "Скидки", 'url_name': 'discounts'},
     {'title': "Контакты", 'url_name': 'contacts'},
     {'title': "Корзина", 'url_name': 'shopping_cart'}
 ]
@@ -14,9 +17,20 @@ menu = [
 data = {
     'title': 'Каталог',
     'menu': menu,
-    'catalog': Game.stock.all()
+    'catalog': Game.objects.all()
 }
 
+
+def add_game(request):
+    if request.method == 'POST':
+        form = AddGameForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('catalog')
+    else:
+        form = AddGameForm()
+    return render(request, 'gamestore/add_game.html',
+                  {'menu': menu, 'title': 'Добавление десерта', 'form': form})
 
 
 def index(request):
@@ -53,8 +67,30 @@ def discounts(request):
     return render(request, 'gamestore/discounts.html', {'title': 'Скидки', 'menu': menu})
 
 
+def handle_uploaded_file(f):
+    name = f.name
+    ext = ''
+    if '.' in name:
+        ext = name[name.rindex('.'):]
+        name = name[:name.rindex('.')]
+    suffix = str(uuid.uuid4())
+    with open(f"uploads/{name}_{suffix}{ext}", "wb+") as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+
+
+
+
 def contacts(request):
-    return render(request, 'gamestore/contacts.html', {'title': 'Контакты', 'menu': menu})
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            fp = UploadFiles(file=form.cleaned_data['file'])
+            fp.save()
+    else:
+        form = UploadFileForm()
+    return render(request, 'gamestore/contacts.html', {'title': 'Контакты', 'menu': menu, 'form': form})
 
 
 def shopping_cart(request):
