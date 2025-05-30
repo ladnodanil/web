@@ -1,30 +1,62 @@
-{% extends 'base.html' %} {% load catalog_tags %} {% block content %}
-<h1>{{title}}</h1>
+{% extends 'base.html' %}
+{% load catalog_tags %}
 
-<ul id="catalog-list">
-  {% for p in catalog %}
-  <li>
-    
-    <h2>{{ p.title }}</h2>
-    {% if p.image %}
-    <img class="img-article-left" src="{{ p.image.url }}" alt="{{ p.title }}" /></p>
-    {% endif %}
-    <p>{{ p.description }}</p>
-    <p><a href="{{ p.get_absolute_url }}">Подробно</a></p>
-    {% if not forloop.last %}
-    <hr />
-    {% endif %}
-  </li>
-  {% endfor %}
-</ul>
+{% block content %}
+    <h1>{{ title }}</h1>
 
-{% endblock %} {% block category %} {% get_categories as categories %}
-<ul id="leftchapters">
-  {% if cat_selected == 0 or cat_selected is None %}
-  <li class="selected">Все категории</li>
-  {% else %}
-  <li><a href="{% url 'catalog' %}">Все категории</a></li>
-  {% endif %} {% show_categories cat_selected %}
-  <li>{% show_all_tags %}</li>
-</ul>
+    <ul id="catalog-list">
+        {% for p in catalog %}
+            <li>
+                <h2>{{ p.title }}</h2>
+                {% if p.image %}
+                    <img class="img-article-left" src="{{ p.image.url }}" alt="{{ p.title }}" />
+                {% endif %}
+                <p>{{ p.description }}</p>
+                <p><a href="{{ p.get_absolute_url }}">Подробно</a></p>
+                {% if not forloop.last %}
+                    <hr />
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+{% block navigation %}
+    {% if page_obj.has_other_pages %}
+        <nav class="list-pages">
+            <ul>
+              {% if page_obj.has_previous %}
+              <li class="page-num"><a href="?page={{page_obj.previous_page_number }}">&lt;</a></li>
+              {% endif %}
+                {% for p in paginator.page_range %}
+                  {% if page_obj.number == p %}
+                      <li class="page-num page-num-selected">{{ p }}</li>
+                  {% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                      <li class="page-num">
+                          <a href="?page={{ p }}">{{ p }}</a>
+                      </li>
+                  {% endif %}
+                {% endfor %}
+              {% if page_obj.has_next %}
+              <li class="page-num"><a href="?page={{ page_obj.next_page_number}}">&gt;</a></li>
+              {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endblock %}
+
+{% block category %}
+    {% get_categories as categories %}
+    <ul id="leftchapters">
+        {% if cat_selected == 0 or cat_selected is None %}
+            <li class="selected">Все категории</li>
+        {% else %}
+            <li>
+                <a href="{% url 'catalog' %}">Все категории</a>
+            </li>
+        {% endif %}
+        
+        {% show_categories cat_selected %}
+        <li>{% show_all_tags %}</li>
+    </ul>
 {% endblock %}

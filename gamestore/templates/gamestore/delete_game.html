@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<p>Вы уверены, что хотите удалить игру "{{ game.title }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Удалить</button>
+    <a href="{% url 'catalog' %}">Отмена</a>
+</form>
+{% endblock %}
