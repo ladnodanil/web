@@ -1,4 +1,4 @@
-from pyexpat.errors import messages
+from django.contrib import messages
 from typing import Any
 from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet
