@@ -1,39 +1,196 @@
-{% extends 'base.html' %} 
-{% load static %} 
-{% block content %}
+{% extends 'base.html' %} {% load static %} {% block content %}
 <div class="game-detail">
+  {% if perms.women.change_women %}
+  <div class="edit-link">
+    <a href="{% url 'edit_game' game.id %}" class="button">Редактировать</a>
+  </div>
+  {% endif %}
+  
   <h1 class="game-title">{{ game.title }}</h1>
+  
+  <div class="game-actions">
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'like_game' game.slug %}" style="display: inline">
+      {% csrf_token %}
+      <button type="submit" class="like-button {% if user_liked %}liked{% endif %}">
+        {% if user_liked %}❤️{% else %}🤍{% endif %} <span class="likes-count">{{ likes_count }}</span>
+      </button>
+    </form>
+    {% else %}
+    <div class="like-button disabled">
+      🤍 <span class="likes-count">{{ likes_count }}</span>
+    </div>
+    {% endif %}
+  </div>
+
   <div class="game-info">
     {% if game.image %}
     <div class="game-image">
-      <img  class="img" src="{{ game.image.url }}" alt="{{ game.title }}" />
+      <img src="{{ game.image.url }}" alt="{{ game.title }}" />
     </div>
     {% endif %}
-    <div class="game-description">
-      <p>{{ game.description|linebreaks }}</p>
-    </div>
-    <div class="game-details">
-      <h2>Детали игры</h2>
-      <p><strong>Цена:</strong> {{ game.price }} руб.</p>
-      <p>
-        <strong>Категория:</strong>
-        <a href="{{ game.category.get_absolute_url }}"
-          >{{ game.category.name }}</a
-        >
-      </p>
-      <p>
-        <strong>Теги:</strong>
-        {% for tag in game.tags.all %}
-        <a href="{{ tag.get_absolute_url }}">{{ tag.name }}</a>
-        {% if not forloop.last %}
-        {% endif %} 
-        {% endfor %}
-      </p>
-      {% if game.details %}
-      <p><strong>Дата выпуска:</strong> {{ game.details.release_date }}</p>
-      <p><strong>Разработчик:</strong> {{ game.details.developer }}</p>
-      {% endif %}
+    
+    <div class="game-content">
+      <div class="game-description">
+        <h2>Описание</h2>
+        <p>{{ game.description|linebreaks }}</p>
+      </div>
+
+      <div class="game-details">
+        <h2>Детали игры</h2>
+        <div class="details-grid">
+          <p><strong>Цена:</strong> <span class="price">{{ game.price }} руб.</span></p>
+          <p>
+            <strong>Категория:</strong>
+            <a href="{{ game.category.get_absolute_url }}">{{ game.category.name }}</a>
+          </p>
+          <p>
+            <strong>Теги:</strong>
+            <div class="tags">
+              {% for tag in game.tags.all %}
+              <a href="{{ tag.get_absolute_url }}" class="tag">{{ tag.name }}</a>
+              {% endfor %}
+            </div>
+          </p>
+          {% if game.details %}
+          <p><strong>Дата выпуска:</strong> {{ game.details.release_date }}</p>
+          <p><strong>Разработчик:</strong> {{ game.details.developer }}</p>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Секция комментариев -->
+<div class="comments-section">
+  <h2>Комментарии</h2>
+
+  {% if user.is_authenticated %}
+  <div class="add-comment">
+    <h3>Добавить комментарий</h3>
+    <form method="post" action="{% url 'add_comment' game_slug=game.slug %}" class="comment-form">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button type="submit" class="button">Отправить</button>
+    </form>
+  </div>
+  {% else %}
+  <p>Чтобы оставить комментарий, пожалуйста, <a href="{% url 'users:login' %}">войдите</a> в систему.</p>
+  {% endif %}
+
+  <div class="comments-list">
+    {% for comment in comments %}
+    <div class="comment">
+      <div class="comment-header">
+        <strong>{{ comment.user.username }}</strong>
+        <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+        {% if comment.user == user %}
+        <div class="comment-actions">
+          <button class="button-m edit-comment" data-comment-id="{{ comment.id }}">✎</button>
+          <form method="post" action="{% url 'delete_comment' comment_id=comment.id %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="button-m" onclick="return confirm('Вы уверены, что хотите удалить этот комментарий?')">✕</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+      <div class="comment-text" id="comment-text-{{ comment.id }}">{{ comment.text|linebreaks }}</div>
+      {% if comment.user == user %}
+      <div class="comment-edit-form" id="comment-edit-{{ comment.id }}" style="display: none;">
+        <form method="post" action="{% url 'edit_comment' comment_id=comment.id %}" class="edit-form">
+          {% csrf_token %}
+          <textarea name="text" rows="4" class="edit-textarea">{{ comment.text }}</textarea>
+          <div class="edit-actions">
+            <button type="submit" class="button save-edit">Сохранить</button>
+            <button type="button" class="button cancel-edit">Отмена</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% empty %}
+    <p>Пока нет комментариев. Будьте первым!</p>
+    {% endfor %}
+  </div>
+</div>
+
 {% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Edit button click handler
+    document.querySelectorAll('.edit-comment').forEach(button => {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            document.getElementById(`comment-text-${commentId}`).style.display = 'none';
+            document.getElementById(`comment-edit-${commentId}`).style.display = 'block';
+        });
+    });
+
+    // Cancel button click handler
+    document.querySelectorAll('.cancel-edit').forEach(button => {
+        button.addEventListener('click', function() {
+            const commentId = this.closest('.comment-edit-form').id.split('-')[2];
+            document.getElementById(`comment-text-${commentId}`).style.display = 'block';
+            document.getElementById(`comment-edit-${commentId}`).style.display = 'none';
+        });
+    });
+
+    // Form submit handler
+    document.querySelectorAll('.edit-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const commentId = this.closest('.comment-edit-form').id.split('-')[2];
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById(`comment-text-${commentId}`).innerHTML = data.text.replace(/\n/g, '<br>');
+                    document.getElementById(`comment-text-${commentId}`).style.display = 'block';
+                    document.getElementById(`comment-edit-${commentId}`).style.display = 'none';
+                } else {
+                    throw new Error('Server returned error status');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при сохранении комментария. Пожалуйста, попробуйте еще раз.');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+

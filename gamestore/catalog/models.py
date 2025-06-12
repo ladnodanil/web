@@ -3,6 +3,9 @@ from django.urls import reverse
 
 
 class TagGame(models.Model):
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
     name = models.CharField(max_length=100, db_index=True)
     slug = models.SlugField(max_length=255, db_index=True, unique=True)
 
@@ -70,5 +73,48 @@ class Game(models.Model):
     def get_absolute_url(self):
         return reverse('game_detail', kwargs={'game_slug': self.slug})
 
+
 class UploadFiles(models.Model):
     file = models.FileField(upload_to='uploads_model')
+
+
+class Comment(models.Model):
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ['-created_at'] 
+    
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='comments', verbose_name='Игра')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='comments', verbose_name='Пользователь')
+    text = models.TextField(verbose_name='Текст комментария')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    
+    def __str__(self):
+        return self.text
+
+
+class Like(models.Model):
+    class Meta:
+        verbose_name = 'Лайк'
+        verbose_name_plural = 'Лайки'
+        unique_together = ('user', 'game')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='likes', verbose_name='Пользователь')
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='likes', verbose_name='Игра')
+
+    def __str__(self):
+        return f'{self.user.username} likes {self.game.title}'
+
+
+class Feedback(models.Model):
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ['-created_at']
+    
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='feedbacks', verbose_name='Пользователь')
+    text = models.TextField(verbose_name='Текст отзыва')
+    rating = models.IntegerField(verbose_name='Оценка', choices=[(i, i) for i in range(1, 6)])
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    
+    def __str__(self):
+        return self.text

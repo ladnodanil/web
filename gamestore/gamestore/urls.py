@@ -12,6 +12,7 @@ admin.site.index_title = "Магазин игр"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('catalog.urls')),
+    path('users/', include('users.urls', namespace='users')),
     path('__debug__/', include(debug_toolbar_urls())),
 ]
 handler404 = 'catalog.views.page_not_found'

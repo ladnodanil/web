@@ -1,10 +1,11 @@
 menu = [
     {'title': "Каталог игр", 'url_name': 'catalog'},
-    {'title': 'Добавить игру', 'url_name': 'add_game'},
+    #{'title': 'Добавить игру', 'url_name': 'add_game'},
+    {'title': 'Отзывы', 'url_name': 'feedback'}
     # {'title': "Лидеры продаж", 'url_name': 'top_sellers'},
     # {'title': "Скидки", 'url_name': 'discounts'},
-    {'title': "Контакты", 'url_name': 'contacts'},
-    {'title': "Корзина", 'url_name': 'shopping_cart'}
+    #{'title': "Контакты", 'url_name': 'contacts'},
+    # {'title': "Корзина", 'url_name': 'shopping_cart'}
     ]
 
 class DataMixin:
